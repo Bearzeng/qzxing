@@ -287,13 +287,15 @@ void QZXingFilterRunnable::processVideoFrameProbed(SimpleVideoFrame & videoFrame
         pixel = image_ptr->bits();
 
         for (int y = captureRect.startY; y < captureRect.endY; y++){
-            uint32_t *row = &yuvPtr[y*(width/2)-(width/4)];
-            for (int x = captureRect.startX; x < captureRect.endX; x++){
-                uint32_t pxl = row[x];
-                const int y0 = (unsigned char)((uint8_t *)&pxl)[0];
-                const int u = (unsigned char)((uint8_t *)&pxl)[1];
-                const int v = (unsigned char)((uint8_t *)&pxl)[3];
+            uint8_t *row = (uint8_t *)data + y*(width*2);
+            for (int x = captureRect.startX; x < captureRect.endX; x+=2){
+                uchar y0 = row[2*x];
+                uchar u =  row[2*x+1];
+                uchar y1 = row[2*x+2];
+                uchar v  = row[2*x+3];
                 *pixel = yuvToGray(y0, u, v);
+                ++pixel;
+                *pixel = yuvToGray(y1, u, v);
                 ++pixel;
             }
         }
